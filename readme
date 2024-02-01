@@ -1,0 +1,28 @@
+# Currency Converter
+
+This is a simple currency converter web application that allows users to convert between different currencies using real-time exchange rates.
+
+## Features
+
+- Convert between various currencies with real-time exchange rates.
+- Select currencies using dropdown menus.
+- Easily swap the selected currencies by clicking on an exchange rate icon.
+- Automatically updates the converted amount when the input amount or selected currencies change.
+
+## Technologies Used
+
+- HTML
+- CSS
+- JavaScript
+
+## Usage
+
+1. Open the `index.html` file in your web browser.
+2. Enter the amount you want to convert in the input field.
+3. Select the currency you want to convert from and the currency you want to convert to using the dropdown menus.
+4. Click the "Convert" button to see the converted amount.
+5. To swap the selected currencies, simply click on the exchange rate icon located between the currency selection dropdowns.
+
+## Credits
+
+- Currency exchange rates data provided by [Fawaz Ahmed's Currency API](https://github.com/fawazahmed0/currency-api).
