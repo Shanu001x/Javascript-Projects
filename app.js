@@ -1,62 +1,69 @@
-const BASE_URL =
-  "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies";
+const BASE_URL = 'https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies';
+const dropdowns = document.querySelectorAll('.dropdown select');
+const btn = document.querySelector('form button');
+const fromCurr = document.querySelector('.from select');
+const toCurr = document.querySelector('.to select');
+const amountInput = document.querySelector('.amount input');
+const msg = document.querySelector('.msg');
+const fromCurrencyFlag = document.querySelector('.from .flag img');
+const toCurrencyFlag = document.querySelector('.to .flag img');
 
-const dropdowns = document.querySelectorAll(".dropdown select");
-const btn = document.querySelector("form button");
-const fromCurr = document.querySelector(".from select");
-const toCurr = document.querySelector(".to select");
-const msg = document.querySelector(".msg");
-const fromcurrency = document.querySelector("i");
-const tocurrency = document.querySelector("i");
+let isLoading = false;
 
-
-for (let select of dropdowns) {
-  for (currCode in countryList) {
-    let newOption = document.createElement("option");
-    newOption.innerText = currCode;
-    newOption.value = currCode;
-    if (select.name === "from" && currCode === "USD") {
-      newOption.selected = "selected";
-    } else if (select.name === "to" && currCode === "INR") {
-      newOption.selected = "selected";
-    }
-    select.append(newOption);
-  }
-
-  select.addEventListener("change", (evt) => {
-    updateFlag(evt.target);
-  });
-}
-
-const updateExchangeRate = async () => {
-  let amount = document.querySelector(".amount input");
-  let amtVal = amount.value;
-  if (amtVal === "" || amtVal < 1) {
-    amtVal = 1;
-    amount.value = "1";
-  }
-  const URL = `${BASE_URL}/${fromCurr.value.toLowerCase()}/${toCurr.value.toLowerCase()}.json`;
-  let response = await fetch(URL);
-  let data = await response.json();
-  let rate = data[toCurr.value.toLowerCase()];
-
-  let finalAmount = amtVal * rate;
-  msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
+const updateFlags = () => {
+  updateFlag(fromCurr, fromCurrencyFlag);
+  updateFlag(toCurr, toCurrencyFlag);
 };
 
-const updateFlag = (element) => {
-  let currCode = element.value;
-  let countryCode = countryList[currCode];
-  let newSrc = `https://flagsapi.com/${countryCode}/flat/64.png`;
-  let img = element.parentElement.querySelector("img");
+const updateFlag = (select, img) => {
+  const currCode = select.value;
+  const countryCode = countryList[currCode];
+  const newSrc = `https://flagsapi.com/${countryCode}/flat/64.png`;
   img.src = newSrc;
 };
 
-btn.addEventListener("click", (evt) => {
-  evt.preventDefault();
-  updateExchangeRate();
-});
+const updateExchangeRate = async () => {
+  if (isLoading) return;
+  isLoading = true;
+  msg.innerText = 'Loading...';
 
-window.addEventListener("load", () => {
-  updateExchangeRate();
-});
+  const amount = amountInput.value;
+  if (+amount <= 0) {
+    msg.innerText = 'Please enter a positive number.';
+    isLoading = false;
+    return;
+  }
+
+  const fromCurrCode = fromCurr.value.toLowerCase();
+  const toCurrCode = toCurr.value.toLowerCase();
+
+  if (fromCurrCode === toCurrCode) {
+    msg.innerText = `${amount} ${fromCurrCode} = ${amount} ${toCurrCode}`;
+    isLoading = false;
+    return;
+  }
+
+  try {
+    const URL = `${BASE_URL}/${fromCurrCode}/${toCurrCode}.json`;
+    const response = await fetch(URL);
+    if (!response.ok) throw new Error(response.statusText);
+    const data = await response.json();
+    const rate = data[toCurrCode];
+
+    const finalAmount = (amount * rate).toFixed(2);
+    msg.innerText = `${amount} ${fromCurrCode} = ${finalAmount} ${toCurrCode}`;
+  } catch (error) {
+    msg.innerText = 'Error: Unable to fetch exchange rate.';
+  }
+
+  isLoading = false;
+};
+
+for (const select of dropdowns) {
+  for (const currCode in countryList) {
+    const newOption = document.createElement('option');
+    newOption.innerText = currCode;
+    newOption.value = currCode;
+    if (select.name === 'from' && currCode === 'USD') {
+      newOption.selected = 'selected';
+    } else if (
